@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog
 from ftplib import FTP
-from PIL import Image, ImageTk
-import tkinter.ttk as ttk
+from PIL import ImageTk, Image
 
 # Konfigurasi FTP
 ftp_host = '192.168.1.14'
@@ -14,26 +13,38 @@ class LoginWindow:
         self.root.title('Login')
         self.root.geometry('600x400')
 
-        background_image = Image.open('bg.jpg')
-        self.background_photo = ImageTk.PhotoImage(background_image)
+        style = ttk.Style()
+        style.configure('TLabel', font=('Arial', 12, 'bold'))
+        style.configure('TEntry', font=('Arial', 12))
+        style.configure('TButton', font=('Arial', 12))
 
-        background_label = tk.Label(root, image=self.background_photo)
-        background_label.place(x=0, y=0, relwidth=1, relheight=1)
+        # Menambahkan latar belakang gambar
+        image = Image.open('bg.png')
+        image = image.resize((600, 400), Image.ANTIALIAS)
+        self.bg_image = ImageTk.PhotoImage(image)
+        bg_label = ttk.Label(root, image=self.bg_image)
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        label_username = tk.Label(root, text='Username')
-        label_username.pack()
+        label_username = ttk.Label(root, text='Username :')
+        label_username.pack(pady=(100, 5))
 
-        self.entry_username = tk.Entry(root)
-        self.entry_username.pack()
+        self.entry_username = ttk.Entry(root)
+        self.entry_username.pack(pady=5)
 
-        label_password = tk.Label(root, text='Password')
-        label_password.pack()
+        label_password = ttk.Label(root, text='Password :')
+        label_password.pack(pady=5)
 
-        self.entry_password = tk.Entry(root, show='*')
-        self.entry_password.pack()
+        self.entry_password = ttk.Entry(root, show='*')
+        self.entry_password.pack(pady=5)
 
-        login_button = tk.Button(root, text='Login', command=self.login, background='lightgreen')
-        login_button.pack()
+        login_button = ttk.Button(root, text='Login', command=self.login, style='TButton')
+        login_button.pack(pady=(20, 50))
+
+        # Untuk mengatur tampilan di tengah secara horizontal
+        root.update()
+        width = root.winfo_width()
+        root.geometry(f"{width}x400+{root.winfo_screenwidth() // 2 - width // 2}+0")
+
 
     def login(self):
         username = self.entry_username.get()
@@ -45,37 +56,51 @@ class LoginWindow:
             ftp.login(user=username, passwd=password)
             self.root.destroy()
             app_root = tk.Tk()
-            FTPClientApp(app_root, ftp, self.background_photo)
+            FTPClientApp(app_root, ftp)
             app_root.mainloop()
         except:
             messagebox.showerror('Login Failed', 'Failed to connect to the FTP server.')
 
 class FTPClientApp:
-    def __init__(self, root, ftp, background_photo):
+    def __init__(self, root, ftp):
         self.root = root
         self.root.title('Aplikasi FTP')
         self.root.geometry('600x400')
 
-        self.ftp = ftp
-        self.background_photo = background_photo
+        style = ttk.Style()
+        style.configure('TLabel', font=('Arial', 12))
+        style.configure('TButton', font=('Arial', 12))
 
-        label = tk.Label(root, text='Daftar File di Server FTP')
-        label.pack()
+        self.ftp = ftp
+
+        image = Image.open('bg.png')
+        image = image.resize((600, 400), Image.ANTIALIAS)
+        self.bg_image = ImageTk.PhotoImage(image)
+        bg_label = ttk.Label(root, image=self.bg_image)
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        back_button = ttk.Button(root, text='Back', command=self.back_to_login, style='TButton')
+        back_button.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
+
+        label = ttk.Label(root, text='Daftar File di Server FTP')
+        label.grid(row=1, column=0, columnspan=3, pady=(10, 5))
 
         self.file_listbox = tk.Listbox(root)
-        self.file_listbox.pack()
+        self.file_listbox.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10))
 
-        upload_button = tk.Button(root, text='Unggah File', command=self.upload_file)
-        upload_button.pack()
+        upload_button = ttk.Button(root, text='Upload', command=self.upload_file, style='TButton')
+        upload_button.grid(row=4, column=0, padx=10, pady=10, sticky='w')
 
-        download_button = tk.Button(root, text='Unduh File', command=self.download_file)
-        download_button.pack()
+        download_button = ttk.Button(root, text='Download', command=self.download_file, style='TButton')
+        download_button.grid(row=3, column=1, padx=10, pady=(5, 50))
 
-        delete_button = tk.Button(root, text='Hapus File', command=self.delete_file)
-        delete_button.pack()
+        delete_button = ttk.Button(root, text='Delete', command=self.delete_file, style='TButton')
+        delete_button.grid(row=4, column=2, padx=10, pady=10, sticky='e')
 
-        back_button = tk.Button(root, text='Kembali ke Login', command=self.back_to_login)
-        back_button.pack()
+        root.columnconfigure(0, weight=1)
+        root.columnconfigure(1, weight=1)
+        root.columnconfigure(2, weight=1)
+        root.rowconfigure(2, weight=1)
 
         self.refresh_file_list()
 
