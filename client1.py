@@ -10,7 +10,7 @@ ftp_port = 21
 class LoginWindow:
     def __init__(self, root):
         self.root = root
-        self.root.title('Login')
+        self.root.title('Aplikasi FTP Client')
         self.root.geometry('600x400')
 
         style = ttk.Style()
@@ -64,7 +64,7 @@ class LoginWindow:
 class FTPClientApp:
     def __init__(self, root, ftp):
         self.root = root
-        self.root.title('Aplikasi FTP')
+        self.root.title('Aplikasi FTP Client')
         self.root.geometry('600x400')
 
         style = ttk.Style()
