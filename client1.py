@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog, simpledialog
+from tkinter import ttk, messagebox, filedialog, simpledialog, Scrollbar
 from ftplib import FTP
 from PIL import ImageTk, Image
 
@@ -99,6 +99,11 @@ class FTPClientApp:
 
         self.file_listbox = tk.Listbox(root)
         self.file_listbox.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10))
+
+        scrollbar = Scrollbar(root)
+        scrollbar.grid(row=2, column=3, sticky='ns')
+        self.file_listbox.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.file_listbox.yview)
 
         upload_button = ttk.Button(root, text='Upload', command=self.upload_file, style='TButton')
         upload_button.grid(row=4, column=0, padx=10, pady=10, sticky='w')
