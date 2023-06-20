@@ -36,7 +36,9 @@ class LoginWindow:
 
         self.entry_password = ttk.Entry(root, show='*')
         self.entry_password.pack(pady=5)
-        self.entry_password.bind('<Return>', self.login_enter)
+
+        toggle_button = ttk.Button(root, text='Toggle', command=self.toggle_password_input, style='TButton')
+        toggle_button.pack(pady=5)
 
         login_button = ttk.Button(root, text='Login', command=self.login, style='TButton')
         login_button.pack(pady=(20, 50))
@@ -45,7 +47,6 @@ class LoginWindow:
         root.update()
         width = root.winfo_width()
         root.geometry(f"{width}x400+{root.winfo_screenwidth() // 2 - width // 2}+0")
-
 
     def login(self):
         username = self.entry_username.get()
@@ -64,6 +65,12 @@ class LoginWindow:
 
     def login_enter(self, event):
         self.login()
+
+    def toggle_password_input(self):
+        if self.entry_password.cget('show') == '':
+            self.entry_password.configure(show='*')
+        else:
+            self.entry_password.configure(show='')
 
 class FTPClientApp:
     def __init__(self, root, ftp):
