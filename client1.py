@@ -36,6 +36,7 @@ class LoginWindow:
 
         self.entry_password = ttk.Entry(root, show='*')
         self.entry_password.pack(pady=5)
+        self.entry_password.bind('<Return>', self.login_enter)
 
         toggle_button = ttk.Button(root, text='Toggle', command=self.toggle_password_input, style='TButton')
         toggle_button.pack(pady=5)
