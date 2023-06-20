@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, simpledialog
 from ftplib import FTP
 from PIL import ImageTk, Image
 
 # Konfigurasi FTP
-ftp_host = '192.168.1.14'
+ftp_host = '192.168.69.183'
 ftp_port = 21
 
 class LoginWindow:
@@ -36,6 +36,7 @@ class LoginWindow:
 
         self.entry_password = ttk.Entry(root, show='*')
         self.entry_password.pack(pady=5)
+        self.entry_password.bind('<Return>', self.login_enter)
 
         login_button = ttk.Button(root, text='Login', command=self.login, style='TButton')
         login_button.pack(pady=(20, 50))
@@ -61,9 +62,13 @@ class LoginWindow:
         except:
             messagebox.showerror('Login Failed', 'Failed to connect to the FTP server.')
 
+    def login_enter(self, event):
+        self.login()
+
 class FTPClientApp:
     def __init__(self, root, ftp):
         self.root = root
+        self.selected_file = None
         self.root.title('Aplikasi FTP Client')
         self.root.geometry('600x400')
 
@@ -96,6 +101,9 @@ class FTPClientApp:
 
         delete_button = ttk.Button(root, text='Delete', command=self.delete_file, style='TButton')
         delete_button.grid(row=4, column=2, padx=10, pady=10, sticky='e')
+
+        rename_button = ttk.Button(root, text='Rename', command=self.rename_file, style='TButton')
+        rename_button.grid(row=3, column=0, padx=10, pady=(5, 50))
 
         root.columnconfigure(0, weight=1)
         root.columnconfigure(1, weight=1)
@@ -130,6 +138,28 @@ class FTPClientApp:
         self.file_listbox.delete(0, 'end')
         for file_name in file_list:
             self.file_listbox.insert('end', file_name)
+
+        current_dir = self.ftp.pwd()
+        file_list = self.ftp.nlst()
+        self.file_listbox.delete(0, 'end')
+        for file_name in file_list:
+            self.file_listbox.insert('end', file_name)
+        
+        # Scroll ke file terpilih setelah memperbarui daftar
+        if self.selected_file:
+            index = file_list.index(self.selected_file)
+            self.file_listbox.see(index)
+
+    def rename_file(self):
+        selected_file = self.file_listbox.get(self.file_listbox.curselection())
+        if selected_file:
+            new_name = simpledialog.askstring('Rename File', 'Enter new file name:', initialvalue=selected_file)
+            if new_name:
+                try:
+                    self.ftp.rename(selected_file, new_name)
+                    self.refresh_file_list()
+                except:
+                    messagebox.showerror('Rename Failed', 'Failed to rename the file on the FTP server.')
 
     def back_to_login(self):
         self.ftp.quit()
