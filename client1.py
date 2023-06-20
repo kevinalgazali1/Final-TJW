@@ -38,7 +38,7 @@ class LoginWindow:
         self.entry_password.pack(pady=5)
         self.entry_password.bind('<Return>', self.login_enter)
 
-        toggle_button = ttk.Button(root, text='Toggle', command=self.toggle_password_input, style='TButton')
+        toggle_button = ttk.Button(root, text='Show Password', command=self.toggle_password_input, style='TButton')
         toggle_button.pack(pady=5)
 
         login_button = ttk.Button(root, text='Login', command=self.login, style='TButton')
@@ -128,23 +128,39 @@ class FTPClientApp:
     def upload_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
-            with open(file_path, 'rb') as file:
-                file_name = file_path.split('/')[-1]  # Mengambil nama file dari path
-                self.ftp.storbinary(f'STOR {file_name}', file)  # Menggunakan nama file
-                self.refresh_file_list()
+            try:
+                with open(file_path, 'rb') as file:
+                    file_name = file_path.split('/')[-1]  # Mengambil nama file dari path
+                    self.ftp.storbinary(f'STOR {file_name}', file)  # Menggunakan nama file
+                    self.refresh_file_list()
+                messagebox.showinfo('Upload Success', 'File uploaded successfully.')
+            except Exception as e:
+                messagebox.showerror('Upload Failed', f'Failed to upload file.\nError: {str(e)}')
 
     def download_file(self):
         download_dir = filedialog.askdirectory()
         file_name = self.file_listbox.get(self.file_listbox.curselection())
         if file_name and download_dir:
-            with open(f"{download_dir}/{file_name}", 'wb') as file:
-                self.ftp.retrbinary(f'RETR {file_name}', file.write)
+            confirmation = messagebox.askyesno('Konfirmasi', f"Apakah Anda yakin ingin mengunduh file '{file_name}'?")
+            if confirmation:
+                try:
+                    with open(f"{download_dir}/{file_name}", 'wb') as file:
+                        self.ftp.retrbinary(f'RETR {file_name}', file.write)
+                    messagebox.showinfo('Download Successful', f"File '{file_name}' berhasil diunduh.")
+                except:
+                    messagebox.showerror('Download Failed', f"Gagal mengunduh file '{file_name}'.")
 
     def delete_file(self):
         file_name = self.file_listbox.get(self.file_listbox.curselection())
         if file_name:
-            self.ftp.delete(file_name)
-            self.refresh_file_list()
+            confirmation = messagebox.askyesno('Konfirmasi', f"Apakah Anda yakin ingin menghapus file '{file_name}'?")
+            if confirmation:
+                try:
+                    self.ftp.delete(file_name)
+                    self.refresh_file_list()
+                    messagebox.showinfo('Delete Successful', f"File '{file_name}' berhasil dihapus.")
+                except:
+                    messagebox.showerror('Delete Failed', f"File '{file_name}' gagal dihapus.")
 
     def refresh_file_list(self):
         file_list = self.ftp.nlst()
