@@ -4,14 +4,14 @@ from ftplib import FTP
 from PIL import ImageTk, Image
 
 # Konfigurasi FTP
-ftp_host = '192.168.69.183'
+ftp_host = '192.168.91.62'
 ftp_port = 21
 
 class LoginWindow:
     def __init__(self, root):
         self.root = root
         self.root.title('Aplikasi FTP Client')
-        self.root.geometry('600x400')
+        self.root.geometry('800x600')
 
         style = ttk.Style()
         style.configure('TLabel', font=('Arial', 12, 'bold'))
@@ -19,35 +19,36 @@ class LoginWindow:
         style.configure('TButton', font=('Arial', 12))
 
         # Menambahkan latar belakang gambar
-        image = Image.open('bg.png')
-        image = image.resize((600, 400), Image.ANTIALIAS)
+        image = Image.open('Sign.png')
+        image = image.resize((800, 600), Image.ANTIALIAS)
         self.bg_image = ImageTk.PhotoImage(image)
         bg_label = ttk.Label(root, image=self.bg_image)
         bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        label_username = ttk.Label(root, text='Username :')
-        label_username.pack(pady=(100, 5))
+        label_username = ttk.Label(root, text='Username:')
+        label_username.pack(padx=(500, 10), pady=(300, 5))
 
         self.entry_username = ttk.Entry(root)
-        self.entry_username.pack(pady=5)
+        self.entry_username.pack(padx=(500, 10), pady=5)
 
-        label_password = ttk.Label(root, text='Password :')
-        label_password.pack(pady=5)
+        label_password = ttk.Label(root, text='Password:')
+        label_password.pack(padx=(500, 10), pady=5)
 
         self.entry_password = ttk.Entry(root, show='*')
-        self.entry_password.pack(pady=5)
+        self.entry_password.pack(padx=(500, 10), pady=5)
         self.entry_password.bind('<Return>', self.login_enter)
 
-        toggle_button = ttk.Button(root, text='Show Password', command=self.toggle_password_input, style='TButton')
-        toggle_button.pack(pady=5)
-
         login_button = ttk.Button(root, text='Login', command=self.login, style='TButton')
-        login_button.pack(pady=(20, 50))
+        login_button.pack(padx=(500, 10), pady=(20, 50))
+
 
         # Untuk mengatur tampilan di tengah secara horizontal
         root.update()
-        width = root.winfo_width()
-        root.geometry(f"{width}x400+{root.winfo_screenwidth() // 2 - width // 2}+0")
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        x = (screen_width - root.winfo_width()) // 2
+        y = (screen_height - root.winfo_height()) // 2
+        root.geometry(f"+{x}+{y}")
 
     def login(self):
         username = self.entry_username.get()
@@ -67,18 +68,12 @@ class LoginWindow:
     def login_enter(self, event):
         self.login()
 
-    def toggle_password_input(self):
-        if self.entry_password.cget('show') == '':
-            self.entry_password.configure(show='*')
-        else:
-            self.entry_password.configure(show='')
-
 class FTPClientApp:
     def __init__(self, root, ftp):
         self.root = root
         self.selected_file = None
         self.root.title('Aplikasi FTP Client')
-        self.root.geometry('600x400')
+        self.root.geometry('800x600')
 
         style = ttk.Style()
         style.configure('TLabel', font=('Arial', 12))
@@ -86,42 +81,48 @@ class FTPClientApp:
 
         self.ftp = ftp
 
-        image = Image.open('bg.png')
-        image = image.resize((600, 400), Image.ANTIALIAS)
+        image = Image.open('Home.png')
+        image = image.resize((800, 600), Image.ANTIALIAS)
         self.bg_image = ImageTk.PhotoImage(image)
         bg_label = ttk.Label(root, image=self.bg_image)
         bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
+
         back_button = ttk.Button(root, text='Back', command=self.back_to_login, style='TButton')
         back_button.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
 
-        label = ttk.Label(root, text='Daftar File di Server FTP')
-        label.grid(row=1, column=0, columnspan=3, pady=(10, 5))
-
-        self.file_listbox = tk.Listbox(root)
-        self.file_listbox.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10))
+        self.file_listbox = tk.Listbox(root, width=400, height=20)
+        self.file_listbox.grid(row=3, column=0, columnspan=3, padx=10, pady=(0, 10))
 
         scrollbar = Scrollbar(root)
-        scrollbar.grid(row=2, column=3, sticky='ns')
+        scrollbar.grid(row=3, column=3, sticky='ns')
         self.file_listbox.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.file_listbox.yview)
 
         upload_button = ttk.Button(root, text='Upload', command=self.upload_file, style='TButton')
-        upload_button.grid(row=4, column=0, padx=10, pady=10, sticky='w')
+        upload_button.grid(row=1, column=0, padx=10, pady=(130, 10), sticky='w')
 
         download_button = ttk.Button(root, text='Download', command=self.download_file, style='TButton')
-        download_button.grid(row=3, column=1, padx=10, pady=(5, 50))
+        download_button.grid(row=4, column=0, padx=10, pady=10, sticky='w')
 
         delete_button = ttk.Button(root, text='Delete', command=self.delete_file, style='TButton')
         delete_button.grid(row=4, column=2, padx=10, pady=10, sticky='e')
 
         rename_button = ttk.Button(root, text='Rename', command=self.rename_file, style='TButton')
-        rename_button.grid(row=3, column=0, padx=10, pady=(5, 50))
+        rename_button.grid(row=1, column=2, padx=10, pady=(130, 10),sticky='e')
 
         root.columnconfigure(0, weight=1)
         root.columnconfigure(1, weight=1)
         root.columnconfigure(2, weight=1)
         root.rowconfigure(2, weight=1)
+
+        root.update()
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        x = (screen_width - root.winfo_width()) // 2
+        y = (screen_height - root.winfo_height()) // 2
+        root.geometry(f"+{x}+{y}")
+
 
         self.refresh_file_list()
 
